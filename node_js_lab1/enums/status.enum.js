@@ -1,4 +1,5 @@
 module.exports = {
-    PRESENT: 'present',
-    ABSENT: 'absent',
+    PRESENT: 'Present',
+    ABSENT: 'Absent',
+    LATE: 'Late',
 };
