@@ -1,18 +1,25 @@
-const { body, validationResult } = require('express-validator');
+const Joi = require("joi");
+const createError = require("http-errors");
 
-const validateAttendance = [
-    body('student').notEmpty().withMessage('Student is required'),
-    body('group').notEmpty().withMessage('Group is required'),
-    body('subject').notEmpty().withMessage('Subject is required'),
-    body('teacher').notEmpty().withMessage('Teacher is required'),
-    body('date').isISO8601().withMessage('Invalid date format'),
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ status: 400, errors: errors.array() });
-        }
-        next();
+// Схема валідації для запису відвідувань
+const attendanceSchema = Joi.object({
+    group: Joi.string().required(),
+    student: Joi.string().required(),
+    subject: Joi.string().required(),
+    teacher: Joi.string().required(),
+    date: Joi.date().iso().required(),
+    status: Joi.string().valid("present", "absent", "late").required()
+});
+
+// Middleware для валідації
+function validateAttendance(req, res, next) {
+    const { error } = attendanceSchema.validate(req.body);
+    if (error) {
+        return next(createError.BadRequest(error.details[0].message));
     }
-];
+    next();
+}
 
-module.exports = { validateAttendance };
+module.exports = {
+    validateAttendance,
+};
